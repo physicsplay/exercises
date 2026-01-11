@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎪 Εκπαιδευτικό: Ταλάντωση - Κρούση - Αποκόλληση - Βολή</title>
+  <style>
+    :root {
+      --bg-dark: #0a0a1a;
+      --bg-gradient: linear-gradient(135deg, #1a1a3a 0%, #2d1f4a 100%);
+      --accent-gold: #FFD700;
+      --accent-cyan: #4ECDC4;
+      --accent-red: #FF6B6B;
+      --accent-green: #7ED321;
+      --accent-purple: #9B59B6;
+      --accent-orange: #f39c12;
+      --text-light: rgba(240, 246, 252, 0.95);
+      --muted: rgba(240, 246, 252, 0.7);
+      --panel-bg: rgba(20, 20, 40, 0.95);
+      --panel-border: rgba(255, 255, 255, 0.15);
+      --success: #2ecc71;
+      --error: #e74c3c;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-light);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .app {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 12px;
+      min-height: 100vh;
+    }
+    
+    @media (max-width: 1000px) {
+      .app { grid-template-columns: 1fr; }
+      .side-panel { max-height: 50vh; overflow-y: auto; }
+    }
+    
+    .canvas-container {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 10px;
+      position: relative;
+    }
+    
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #0d0d25 0%, #1a1a35 100%);
+    }
+    
+    .phase-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    
+    .phase-box {
+      background: rgba(0,0,0,0.85);
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 2px solid var(--accent-cyan);
+    }
+    
+    .phase-box .label { color: var(--muted); font-size: 11px; }
+    .phase-box .value { color: var(--accent-cyan); font-weight: bold; font-size: 15px; }
+    
+    .score-box {
+      background: rgba(0,0,0,0.85);
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: 2px solid var(--accent-gold);
+    }
+    .score-box .label { color: var(--muted); font-size: 11px; }
+    .score-box .value { color: var(--accent-gold); font-weight: bold; font-size: 18px; }
+    
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    
+    .card h3 {
+      color: var(--accent-cyan);
+      font-size: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .data-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    
+    .data-item {
+      background: rgba(0,0,0,0.3);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .data-item .label { color: var(--muted); font-size: 11px; }
+    .data-item .value { color: var(--text-light); font-weight: bold; font-size: 14px; }
+    
+    .quiz-card {
+      border: 2px solid var(--accent-purple);
+      background: rgba(155, 89, 182, 0.1);
+    }
+    
+    .quiz-card h3 { color: var(--accent-purple); }
+    
+    .quiz-question {
+      background: rgba(0,0,0,0.4);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .quiz-question code {
+      background: rgba(255,255,255,0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-gold);
+    }
+    
+    .quiz-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .quiz-input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.4);
+      color: var(--text-light);
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    .quiz-input:focus {
+      outline: none;
+      border-color: var(--accent-purple);
+    }
+    
+    .quiz-unit {
+      color: var(--muted);
+      font-size: 14px;
+      min-width: 50px;
+    }
+    
+    .quiz-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    
+    .quiz-btn.check {
+      background: linear-gradient(135deg, var(--accent-purple), #8e44ad);
+      color: white;
+    }
+    
+    .quiz-btn.hint {
+      background: linear-gradient(135deg, var(--accent-orange), #e67e22);
+      color: white;
+    }
+    
+    .quiz-btn.reveal {
+      background: linear-gradient(135deg, var(--accent-red), #c0392b);
+      color: white;
+    }
+    
+    .quiz-btn.next {
+      background: linear-gradient(135deg, var(--accent-green), #27ae60);
+      color: white;
+    }
+    
+    .quiz-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .quiz-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    .feedback {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    
+    .feedback.correct {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid var(--success);
+      color: #a9dfbf;
+    }
+    
+    .feedback.wrong {
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid var(--error);
+      color: #f5b7b1;
+    }
+    
+    .feedback.info {
+      background: rgba(52, 152, 219, 0.2);
+      border: 1px solid #3498db;
+      color: #aed6f1;
+    }
+    
+    .hint-box {
+      background: rgba(255, 215, 0, 0.1);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    
+    .hint-box h4 {
+      color: var(--accent-gold);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    
+    .hint-box p {
+      font-size: 13px;
+      color: var(--text-light);
+      margin: 4px 0;
+      line-height: 1.6;
+    }
+    
+    .hint-box .formula {
+      font-family: "Times New Roman", serif;
+      font-size: 15px;
+      background: rgba(0,0,0,0.3);
+      padding: 8px;
+      border-radius: 6px;
+      margin: 6px 0;
+    }
+    
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    
+    .btn {
+      flex: 1;
+      min-width: 100px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-cyan), #3498db);
+      color: #0a0a1a;
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text-light);
+    }
+    
+    .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .progress-container {
+      background: rgba(0,0,0,0.4);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .progress-step {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      color: var(--muted);
+    }
+    
+    .progress-step.active {
+      background: var(--accent-purple);
+      border-color: var(--accent-purple);
+      color: white;
+    }
+    
+    .progress-step.done {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+      color: white;
+    }
+    
+    .progress-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+      border-radius: 2px;
+      transition: width 0.5s;
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    
+    .modal {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal h2 {
+      color: var(--accent-gold);
+      font-size: 24px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .modal-section {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    
+    .modal-section h4 {
+      color: var(--accent-cyan);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .modal-section p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    .hidden { display: none !important; }
+    
+    .attempts-info {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      padding: 6px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 6px;
+    }
+    
+    .attempts-info strong { color: var(--accent-gold); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Canvas -->
+    <div class="canvas-container">
+      <canvas id="canvas" width="800" height="600"></canvas>
+      <div class="phase-overlay">
+        <div class="phase-box">
+          <div class="label" id="lblPhase">ΦΑΣΗ</div>
+          <div class="value" id="phaseDisplay">Αναμονή</div>
+        </div>
+        <div class="score-box">
+          <div class="label" id="lblScore">ΒΑΘΜΟΙ</div>
+          <div class="value" id="scoreDisplay">0</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Side Panel -->
+    <div class="side-panel">
+      <!-- Progress -->
+      <div class="card">
+        <div class="progress-container">
+          <div class="progress-steps">
+            <div class="progress-step" id="step1">1</div>
+            <div class="progress-step" id="step2">2</div>
+            <div class="progress-step" id="step3">3</div>
+            <div class="progress-step" id="step4">4</div>
+            <div class="progress-step" id="step5">5</div>
+            <div class="progress-step" id="step6">6</div>
+            <div class="progress-step" id="step7">7</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+        </div>
+        <div style="text-align: center; color: var(--muted); font-size: 12px;">
+          <span id="progressText">Ερώτημα 1 από 7</span>
+        </div>
+      </div>
+      
+      
+      <!-- Language -->
+      <div class="card">
+        <h3>🌐 <span id="lblLanguage">Γλώσσα</span></h3>
+        <select id="langSelect" class="quiz-input" style="width:100%; font-weight:700;">
+          <option value="el">🇬🇷 Ελληνικά</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="it">🇮🇹 Italiano</option>
+          <option value="fi">🇫🇮 Suomi</option>
+        </select>
+      </div>
+
+<!-- Given Data -->
+      <div class="card">
+        <h3>📋 <span id="lblGivenData">Δεδομένα Άσκησης</span></h3>
+        <div class="data-grid">
+          <div class="data-item">
+            <div class="label" id="lblM1">m₁ (δίσκος)</div>
+            <div class="value">0.1 kg</div>
+          </div>
+          <div class="data-item">
+            <div class="label" id="lblM2">m₂ (κεφάλι)</div>
+            <div class="value">0.1 kg</div>
+          </div>
+          <div class="data-item">
+            <div class="label" id="lblM3">m₃ (βόλος)</div>
+            <div class="value">0.4 kg</div>
+          </div>
+          <div class="data-item">
+            <div class="label" id="lblD">d (Θ.Ι.→θ.φ.μ.)</div>
+            <div class="value">0.1 m</div>
+          </div>
+          <div class="data-item">
+            <div class="label" id="lblA0">A₀ (πλάτος)</div>
+            <div class="value">0.5 m</div>
+          </div>
+          <div class="data-item">
+            <div class="label" id="lblOmegaG">ω, g</div>
+            <div class="value">10, 10</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quiz Card -->
+      <div class="card quiz-card" id="quizCard">
+        <h3>❓ <span id="quizTitle">Ερώτημα</span></h3>
+        <div class="quiz-question" id="quizQuestion"></div>
+        
+        <div class="quiz-input-row">
+          <input type="number" class="quiz-input" id="quizInput" step="0.01" placeholder="Απάντηση">
+          <span class="quiz-unit" id="quizUnit">m/s</span>
+        </div>
+        
+        <button class="quiz-btn check" id="btnCheck">✓ Έλεγχος</button>
+        <button class="quiz-btn hint hidden" id="btnHint">💡 Θέλω Υπόδειξη</button>
+        <button class="quiz-btn reveal hidden" id="btnReveal">👁 Δείξε την Απάντηση (-10 βαθμοί)</button>
+        <button class="quiz-btn next hidden" id="btnNext">▶ Επόμενο</button>
+        
+        <div class="feedback hidden" id="feedback"></div>
+        
+        <div class="hint-box hidden" id="hintBox">
+          <h4>💡 <span id="lblHintTitle">Υπόδειξη</span></h4>
+          <div id="hintContent"></div>
+        </div>
+        
+        <div class="attempts-info" id="attemptsInfo">
+          Προσπάθειες: <strong>0</strong> | Μετά από λάθος → υπόδειξη
+        </div>
+      </div>
+      
+      <!-- Controls -->
+      <div class="card">
+        <h3>🎮 <span id="lblControls">Έλεγχος</span></h3>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnStart">▶ Συνέχεια</button>
+          <button class="btn btn-secondary" id="btnReset">↺ Επαναφορά</button>
+        </div>
+        <p style="margin-top: 10px; font-size: 11px; color: var(--muted); text-align: center;">
+          🐢 <span id="lblSlowLine">Κίνηση σε <strong style="color: var(--accent-cyan);">ΑΡΓΗ ΤΑΧΥΤΗΤΑ</strong> (×0.12)</span>
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Intro Modal -->
+  <div class="modal-overlay" id="introModal">
+    <div class="modal">
+      <h2 id="introTitle">🎪 Επιχείρηση Εκτόξευση Κλόουν</h2>
+      <p id="introSubtitle" style="text-align: center; color: var(--muted); margin-bottom: 16px;">
+        Ταλάντωση • Ελαστική Κρούση • Αποκόλληση • Κατακόρυφη Βολή
+      </p>
+      
+      
+      <div class="modal-section">
+        <h4 id="introLangTitle">🌐 Γλώσσα / Language</h4>
+        <select id="langSelectIntro" class="quiz-input" style="width:100%; font-weight:700;">
+          <option value="el">🇬🇷 Ελληνικά</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="es">🇪🇸 Español</option>
+          <option value="it">🇮🇹 Italiano</option>
+          <option value="fi">🇫🇮 Suomi</option>
+        </select>
+        <p id="introLangNote" style="margin-top:10px; font-size:12px; color: var(--muted);">(Αλλάζει όλο το UI.)</p>
+      </div>
+
+<div class="modal-section">
+        <h4 id="introExerciseTitle">📖 Η Άσκηση</h4>
+        <p id="introExerciseText">
+          Δύο παράλληλα ελατήρια στηρίζουν δίσκο με κεφάλι κλόουν. 
+          Το σύστημα ταλαντώνεται και στη Θ.Ι. συγκρούεται με βόλο που περιμένει εκεί.
+          Μετά την κρούση, το κεφάλι αποκολλάται και συναντά τον βόλο!
+        </p>
+      </div>
+      
+      <div class="modal-section">
+        <h4 id="introScoringTitle">🎯 Βαθμολογία</h4>
+        <p id="introScoringText">
+          • <strong style="color: var(--accent-green);">+20 βαθμοί</strong> για κάθε σωστή απάντηση<br>
+          • <strong style="color: var(--accent-orange);">Υπόδειξη</strong> μετά από λάθος (χωρίς ποινή)<br>
+          • <strong style="color: var(--accent-red);">-10 βαθμοί</strong> αν ζητήσεις την απάντηση<br><br>
+          Μέγιστη βαθμολογία: <strong>140 βαθμοί</strong> (7 ερωτήσεις)
+        </p>
+      </div>
+      
+      <button class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 14px; font-size: 16px;" id="btnStartGame">
+        🚀 Ας Ξεκινήσουμε!
+      </button>
+    </div>
+  </div>
+  
+  <!-- End Modal -->
+  <div class="modal-overlay hidden" id="endModal">
+    <div class="modal">
+      <h2 id="endTitle">🎉 Τέλος!</h2>
+      <div style="text-align: center; font-size: 60px; margin: 20px 0;" id="endMedal">🏆</div>
+      
+      <div class="modal-section">
+        <h4 id="endResultsTitle">📊 Αποτελέσματα</h4>
+        <div id="endResults"></div>
+      </div>
+      
+      <div class="modal-section">
+        <h4 id="endAnalysisTitle">📝 Σύνοψη Φυσικής</h4>
+        <div id="endAnalysis"></div>
+      </div>
+      
+      <button class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 14px;" id="btnPlayAgain">
+        🔄 Παίξε Ξανά
+      </button>
+    </div>
+  </div>
+
+<script>
+/* =====================================================
+   I18N (EL / EN / ES / IT / FI)
+===================================================== */
+const I18N = {
+  el: {
+    phaseLabel: "ΦΑΣΗ",
+    scoreLabel: "ΒΑΘΜΟΙ",
+    languageLabel: "Γλώσσα",
+    givenData: "Δεδομένα Άσκησης",
+    controls: "Έλεγχος",
+    hintTitle: "Υπόδειξη",
+    slowLine: 'Κίνηση σε <strong style="color: var(--accent-cyan);">ΑΡΓΗ ΤΑΧΥΤΗΤΑ</strong> (×0.12)',
+    btnContinue: "▶ Συνέχεια",
+    btnReset: "↺ Επαναφορά",
+    inputPh: "Απάντηση",
+    btnCheck: "✓ Έλεγχος",
+    btnHint: "💡 Θέλω Υπόδειξη",
+    btnReveal: "👁 Δείξε την Απάντηση (-10 βαθμοί)",
+    btnNext: "▶ Επόμενο",
+    progress: (i,n)=>`Ερώτημα ${i} από ${n}`,
+    attemptsInfo: (n, hintShown)=>`Προσπάθειες: <strong>${n}</strong> | ${hintShown ? "💡 Υπόδειξη εμφανίστηκε" : "Μετά από λάθος → υπόδειξη"}`,
+    enterNumber: "Παρακαλώ εισάγετε έναν αριθμό!",
+    wrong: (a,u)=>`✗ Λάθος! Η απάντησή σου: ${a} ${u}`,
+    correct: (tol,u)=>`✓ Σωστά! (εντός ανοχής ±${tol} ${u})`,
+    hintInfo: "💡 Διάβασε την υπόδειξη και προσπάθησε ξανά!",
+    revealInfo: (v,u)=>`👁 Η σωστή απάντηση είναι: <strong>${v} ${u}</strong><br><small>(-10 βαθμοί για αποκάλυψη)</small>`,
+    introTitle: "🎪 Επιχείρηση Εκτόξευση Κλόουν",
+    introSubtitle: "Ταλάντωση • Ελαστική Κρούση • Αποκόλληση • Κατακόρυφη Βολή",
+    introLangTitle: "🌐 Γλώσσα / Language",
+    introLangNote: "(Αλλάζει όλο το UI.)",
+    introExerciseTitle: "📖 Η Άσκηση",
+    introExerciseText:
+      "Δύο κατακόρυφα ελατήρια στηρίζουν δίσκο με κεφάλι κλόουν. " +
+      "Το σύστημα ταλαντώνεται και στη Θ.Ι. συγκρούεται ελαστικά με βόλο που περιμένει εκεί. " +
+      "Μετά την κρούση, το κεφάλι αποκολλάται και αργότερα συναντά τον βόλο.",
+    introScoringTitle: "🎯 Βαθμολογία",
+    introScoringText:
+      "• <strong style='color: var(--accent-green);'>+20 βαθμοί</strong> για κάθε σωστή απάντηση<br>" +
+      "• <strong style='color: var(--accent-orange);'>Υπόδειξη</strong> μετά από λάθος (χωρίς ποινή)<br>" +
+      "• <strong style='color: var(--accent-red);'>-10 βαθμοί</strong> αν ζητήσεις την απάντηση<br><br>" +
+      "Μέγιστη βαθμολογία: <strong>140 βαθμοί</strong> (7 ερωτήσεις)",
+    startGame: "🚀 Ας Ξεκινήσουμε!",
+    endResultsTitle: "📊 Αποτελέσματα",
+    endAnalysisTitle: "📝 Σύνοψη Φυσικής",
+    playAgain: "🔄 Παίξε Ξανά",
+    // data labels
+    m1: "m₁ (δίσκος)",
+    m2: "m₂ (κεφάλι)",
+    m3: "m₃ (βόλος)",
+    dLabel: "d (Θ.Ι.→θ.φ.μ.)",
+    a0Label: "A₀ (πλάτος)",
+    omegaG: "ω, g",
+    // phases
+    phase_idle: "Αναμονή",
+    phase_to_equilibrium: "⏫ Προς Θ.Ι.",
+    phase_at_collision: "💥 ΚΡΟΥΣΗ στη Θ.Ι.!",
+    phase_post_collision: "⏬↗ Μετά κρούση",
+    phase_show_amplitude: "📏 Νέο πλάτος A₁",
+    phase_to_detach: "⏫ Προς αποκόλληση",
+    phase_at_detach: "✂️ Αποκόλληση στη θ.φ.μ.!",
+    phase_to_meeting: "🎯 Κίνηση βλημάτων",
+    phase_meeting_done: "💥 Συνάντηση!",
+    // canvas labels
+    eqLine: "Θέση Ισορροπίας (x=0)",
+    natLine: "Θέση Φυσ. Μήκους (x=d)",
+    arrowSystem: "Σύστημα",
+    arrowBall: "Βόλος",
+    arrowHead: "Κεφάλι",
+    arrowDisk: "Δίσκος",
+    meetingBanner: "💥 ΣΥΝΑΝΤΗΣΗ!",
+    // end
+    endExcellent: "🎉 Εξαιρετικά!",
+    endGood: "👏 Πολύ καλά!",
+    endOk: "💪 Καλή προσπάθεια!",
+    endStudy: "📖 Χρειάζεται μελέτη",
+    endScore: "Βαθμολογία",
+    endAccuracy: "Ακρίβεια",
+    // questions
+    q_u0_title: "Β1: Ταχύτητα πριν κρούση",
+    q_u0_q:
+      "Το σύστημα φτάνει στη <strong>Θέση Ισορροπίας</strong> κινούμενο προς τα πάνω.<br>" +
+      "Ποια είναι η ταχύτητα <code>u₀</code> ακριβώς <strong>πριν</strong> την κρούση;",
+    q_u0_hint:
+      "<p><strong>Στη Θ.Ι. η απομάκρυνση είναι x = 0</strong></p>" +
+      "<p class='formula'>u = ω · √(A² - x²)</p>" +
+      "<p>Όταν x = 0, η ταχύτητα γίνεται μέγιστη:</p>" +
+      "<p class='formula'>u₀ = ω · A₀</p>" +
+      "<p>Αντικατέστησε: ω = 10 rad/s, A₀ = 0.5 m</p>",
+    q_u1_title: "Β2α: Ταχύτητα συστήματος μετά",
+    q_u1_q:
+      "Η κρούση είναι <strong>ελαστική</strong>. Ο βόλος ήταν ακίνητος.<br>" +
+      "Ποια η ταχύτητα <code>u₁'</code> του συστήματος <strong>μετά</strong> την κρούση;<br>" +
+      "<small>(Αρνητικό = προς τα κάτω)</small>",
+    q_u1_hint:
+      "<p><strong>Τύπος ελαστικής κρούσης:</strong></p>" +
+      "<p class='formula'>u₁' = [(m₁+m₂) − m₃] / [(m₁+m₂) + m₃] × u₀</p>" +
+      "<p>Με m₁+m₂ = 0.2 kg και m₃ = 0.4 kg:</p>" +
+      "<p class='formula'>u₁' = (0.2 − 0.4) / (0.2 + 0.4) × u₀</p>",
+    q_u3_title: "Β2β: Ταχύτητα βόλου μετά",
+    q_u3_q:
+      "Ποια η ταχύτητα <code>u₃'</code> του βόλου <strong>μετά</strong> την κρούση;<br>" +
+      "<small>(Θετικό = προς τα πάνω)</small>",
+    q_u3_hint:
+      "<p><strong>Τύπος για τον βόλο (αρχικά ακίνητος):</strong></p>" +
+      "<p class='formula'>u₃' = 2(m₁+m₂) / [(m₁+m₂) + m₃] × u₀</p>" +
+      "<p class='formula'>u₃' = (2 × 0.2) / 0.6 × u₀</p>",
+    q_a1_title: "Γ1: Νέο πλάτος ταλάντωσης",
+    q_a1_q:
+      "Μετά την κρούση, το σύστημα ταλαντώνεται με νέο πλάτος.<br>" +
+      "Ποιο είναι το <strong>πλάτος A₁</strong>;",
+    q_a1_hint:
+      "<p><strong>Στη Θ.Ι. (x=0), όλη η ενέργεια είναι κινητική:</strong></p>" +
+      "<p class='formula'>½m·u₁'² = ½k<sub>ολ</sub>·A₁²</p>" +
+      "<p class='formula'>A₁ = |u₁'| / ω</p>",
+    q_xdet_title: "Γ2α: Θέση αποκόλλησης",
+    q_xdet_q:
+      "Το κεφάλι αποκολλάται όταν η κάθετη δύναμη N γίνει μηδέν.<br>" +
+      "Σε ποια <strong>θέση x</strong> (από τη Θ.Ι.) γίνεται η αποκόλληση;",
+    q_xdet_hint:
+      "<p><strong>Συνθήκη αποκόλλησης:</strong> N = 0 → a = -g</p>" +
+      "<p>Αυτό συμβαίνει στη θέση φυσικού μήκους:</p>" +
+      "<p class='formula'>x = d</p>",
+    q_vdet_title: "Γ2β: Ταχύτητα αποκόλλησης",
+    q_vdet_q:
+      "Ποια η ταχύτητα <code>u<sub>απ</sub></code> τη στιγμή της αποκόλλησης;<br>" +
+      "<small>(στη θέση x = d = 0.1 m)</small>",
+    q_vdet_hint:
+      "<p class='formula'>u = ω · √(A₁² - x²)</p>" +
+      "<p class='formula'>u<sub>απ</sub> = ω · √(A₁² - d²)</p>",
+    q_ymeet_title: "Δ: Θέση συνάντησης",
+    q_ymeet_q:
+      "Μετά την αποκόλληση, κεφάλι και βόλος κινούνται ως βλήματα.<br>" +
+      "Σε ποιο <strong>ύψος y</strong> (από Θ.Ι.) θα συναντηθούν;<br>" +
+      "<small>t<sub>αποκ</sub> ≈ 0.38 s μετά την κρούση</small>",
+    q_ymeet_hint:
+      "<p><strong>Εξισώσεις βλημάτων (τ από αποκόλληση):</strong></p>" +
+      "<p class='formula'>Κεφάλι: y₂ = d + u<sub>απ</sub>·τ − ½g·τ²</p>" +
+      "<p class='formula'>Βόλος: y₃ = y₃,0 + u₃·τ − ½g·τ²</p>" +
+      "<p>Τα −½gτ² απαλείφονται. Θέσε y₂ = y₃ και λύσε.</p>",
+  },
+
+  en: {
+    phaseLabel: "PHASE",
+    scoreLabel: "SCORE",
+    languageLabel: "Language",
+    givenData: "Problem data",
+    controls: "Controls",
+    hintTitle: "Hint",
+    slowLine: 'Motion in <strong style="color: var(--accent-cyan);">SLOW MODE</strong> (×0.12)',
+    btnContinue: "▶ Continue",
+    btnReset: "↺ Reset",
+    inputPh: "Answer",
+    btnCheck: "✓ Check",
+    btnHint: "💡 I want a hint",
+    btnReveal: "👁 Show the answer (-10 points)",
+    btnNext: "▶ Next",
+    progress: (i,n)=>`Question ${i} of ${n}`,
+    attemptsInfo: (n, hintShown)=>`Attempts: <strong>${n}</strong> | ${hintShown ? "💡 Hint shown" : "After a wrong try → hint"}`,
+    enterNumber: "Please enter a number!",
+    wrong: (a,u)=>`✗ Wrong! Your answer: ${a} ${u}`,
+    correct: (tol,u)=>`✓ Correct! (within tolerance ±${tol} ${u})`,
+    hintInfo: "💡 Read the hint and try again!",
+    revealInfo: (v,u)=>`👁 The correct answer is: <strong>${v} ${u}</strong><br><small>(-10 points for reveal)</small>`,
+    introTitle: "🎪 Operation: Clown Launch",
+    introSubtitle: "Oscillation • Elastic collision • Detachment • Vertical motion",
+    introLangTitle: "🌐 Language",
+    introLangNote: "(Changes the whole UI.)",
+    introExerciseTitle: "📖 The problem",
+    introExerciseText:
+      "Two vertical springs support a disk with a clown head. " +
+      "The system oscillates and at equilibrium it collides elastically with a ball waiting there. " +
+      "After the collision, the head detaches and later meets the ball again.",
+    introScoringTitle: "🎯 Scoring",
+    introScoringText:
+      "• <strong style='color: var(--accent-green);'>+20 points</strong> for each correct answer<br>" +
+      "• <strong style='color: var(--accent-orange);'>Hint</strong> after a wrong try (no penalty)<br>" +
+      "• <strong style='color: var(--accent-red);'>-10 points</strong> if you reveal the answer<br><br>" +
+      "Max score: <strong>140 points</strong> (7 questions)",
+    startGame: "🚀 Start!",
+    endResultsTitle: "📊 Results",
+    endAnalysisTitle: "📝 Physics summary",
+    playAgain: "🔄 Play again",
+    m1: "m₁ (disk)",
+    m2: "m₂ (head)",
+    m3: "m₃ (ball)",
+    dLabel: "d (eq→natural)",
+    a0Label: "A₀ (amplitude)",
+    omegaG: "ω, g",
+    phase_idle: "Idle",
+    phase_to_equilibrium: "⏫ To equilibrium",
+    phase_at_collision: "💥 COLLISION at equilibrium!",
+    phase_post_collision: "⏬↗ After collision",
+    phase_show_amplitude: "📏 New amplitude A₁",
+    phase_to_detach: "⏫ To detachment",
+    phase_at_detach: "✂️ Detachment at x=d!",
+    phase_to_meeting: "🎯 Projectile motion",
+    phase_meeting_done: "💥 Meeting!",
+    eqLine: "Equilibrium (x=0)",
+    natLine: "Natural length line (x=d)",
+    arrowSystem: "System",
+    arrowBall: "Ball",
+    arrowHead: "Head",
+    arrowDisk: "Disk",
+    meetingBanner: "💥 MEETING!",
+    endExcellent: "🎉 Excellent!",
+    endGood: "👏 Very good!",
+    endOk: "💪 Nice try!",
+    endStudy: "📖 Needs practice",
+    endScore: "Score",
+    endAccuracy: "Accuracy",
+    q_u0_title: "B1: Speed before collision",
+    q_u0_q:
+      "The system reaches the <strong>equilibrium position</strong> moving upward.<br>" +
+      "What is the speed <code>u₀</code> just <strong>before</strong> the collision?",
+    q_u0_hint:
+      "<p><strong>At equilibrium, displacement is x = 0</strong></p>" +
+      "<p class='formula'>u = ω · √(A² - x²)</p>" +
+      "<p>So the speed is maximum:</p>" +
+      "<p class='formula'>u₀ = ω · A₀</p>" +
+      "<p>Use: ω = 10 rad/s, A₀ = 0.5 m</p>",
+    q_u1_title: "B2a: System speed after collision",
+    q_u1_q:
+      "The collision is <strong>elastic</strong>. The ball was initially at rest.<br>" +
+      "What is the system speed <code>u₁'</code> right <strong>after</strong> the collision?<br>" +
+      "<small>(Negative = downward)</small>",
+    q_u1_hint:
+      "<p><strong>Elastic collision formula:</strong></p>" +
+      "<p class='formula'>u₁' = [(m₁+m₂) − m₃] / [(m₁+m₂) + m₃] × u₀</p>" +
+      "<p class='formula'>u₁' = (0.2 − 0.4) / (0.2 + 0.4) × u₀</p>",
+    q_u3_title: "B2b: Ball speed after collision",
+    q_u3_q:
+      "What is the ball speed <code>u₃'</code> right <strong>after</strong> the collision?<br>" +
+      "<small>(Positive = upward)</small>",
+    q_u3_hint:
+      "<p class='formula'>u₃' = 2(m₁+m₂) / [(m₁+m₂) + m₃] × u₀</p>" +
+      "<p class='formula'>u₃' = (2 × 0.2) / 0.6 × u₀</p>",
+    q_a1_title: "C1: New oscillation amplitude",
+    q_a1_q:
+      "After the collision, the system oscillates with a new amplitude.<br>" +
+      "What is the <strong>amplitude A₁</strong>?",
+    q_a1_hint:
+      "<p class='formula'>A₁ = |u₁'| / ω</p>",
+    q_xdet_title: "C2a: Detachment position",
+    q_xdet_q:
+      "The head detaches when the normal force becomes zero.<br>" +
+      "At what <strong>position x</strong> (from equilibrium) does detachment occur?",
+    q_xdet_hint:
+      "<p><strong>Condition:</strong> N = 0 → a = -g</p>" +
+      "<p class='formula'>x = d</p>",
+    q_vdet_title: "C2b: Detachment speed",
+    q_vdet_q:
+      "What is the speed <code>u<sub>det</sub></code> at detachment?<br>" +
+      "<small>(at x = d = 0.1 m)</small>",
+    q_vdet_hint:
+      "<p class='formula'>u<sub>det</sub> = ω · √(A₁² - d²)</p>",
+    q_ymeet_title: "D: Meeting height",
+    q_ymeet_q:
+      "After detachment, the head and the ball move as projectiles.<br>" +
+      "At what <strong>height y</strong> (from equilibrium) do they meet?<br>" +
+      "<small>t<sub>det</sub> ≈ 0.38 s after the collision</small>",
+    q_ymeet_hint:
+      "<p><strong>Projectile equations (τ from detachment):</strong></p>" +
+      "<p class='formula'>Head: y₂ = d + u<sub>det</sub>·τ − ½g·τ²</p>" +
+      "<p class='formula'>Ball: y₃ = y₃,0 + u₃·τ − ½g·τ²</p>" +
+      "<p>The −½gτ² terms cancel. Set y₂ = y₃ and solve.</p>",
+  },
+
+  es: {
+    phaseLabel: "FASE",
+    scoreLabel: "PUNTOS",
+    languageLabel: "Idioma",
+    givenData: "Datos del problema",
+    controls: "Controles",
+    hintTitle: "Pista",
+    slowLine: 'Movimiento en <strong style="color: var(--accent-cyan);">CÁMARA LENTA</strong> (×0.12)',
+    btnContinue: "▶ Continuar",
+    btnReset: "↺ Reiniciar",
+    inputPh: "Respuesta",
+    btnCheck: "✓ Comprobar",
+    btnHint: "💡 Quiero una pista",
+    btnReveal: "👁 Mostrar la respuesta (-10 puntos)",
+    btnNext: "▶ Siguiente",
+    progress: (i,n)=>`Pregunta ${i} de ${n}`,
+    attemptsInfo: (n, hintShown)=>`Intentos: <strong>${n}</strong> | ${hintShown ? "💡 Pista mostrada" : "Tras un error → pista"}`,
+    enterNumber: "¡Introduce un número, por favor!",
+    wrong: (a,u)=>`✗ Incorrecto. Tu respuesta: ${a} ${u}`,
+    correct: (tol,u)=>`✓ ¡Correcto! (tolerancia ±${tol} ${u})`,
+    hintInfo: "💡 Lee la pista e inténtalo otra vez.",
+    revealInfo: (v,u)=>`👁 La respuesta correcta es: <strong>${v} ${u}</strong><br><small>(-10 puntos por mostrarla)</small>`,
+    introTitle: "🎪 Operación: Lanzamiento del Payaso",
+    introSubtitle: "Oscilación • Colisión elástica • Desprendimiento • Movimiento vertical",
+    introLangTitle: "🌐 Idioma",
+    introLangNote: "(Cambia toda la interfaz.)",
+    introExerciseTitle: "📖 El problema",
+    introExerciseText:
+      "Dos resortes verticales sostienen un disco con la cabeza del payaso. " +
+      "El sistema oscila y en el equilibrio choca elásticamente con una bola en reposo. " +
+      "Después del choque, la cabeza se desprende y más tarde se encuentra con la bola.",
+    introScoringTitle: "🎯 Puntuación",
+    introScoringText:
+      "• <strong style='color: var(--accent-green);'>+20 puntos</strong> por cada respuesta correcta<br>" +
+      "• <strong style='color: var(--accent-orange);'>Pista</strong> tras un error (sin penalización)<br>" +
+      "• <strong style='color: var(--accent-red);'>-10 puntos</strong> si revelas la respuesta<br><br>" +
+      "Puntuación máxima: <strong>140 puntos</strong> (7 preguntas)",
+    startGame: "🚀 ¡Empezar!",
+    endResultsTitle: "📊 Resultados",
+    endAnalysisTitle: "📝 Resumen de física",
+    playAgain: "🔄 Jugar de nuevo",
+    m1: "m₁ (disco)",
+    m2: "m₂ (cabeza)",
+    m3: "m₃ (bola)",
+    dLabel: "d (eq→long. nat.)",
+    a0Label: "A₀ (amplitud)",
+    omegaG: "ω, g",
+    phase_idle: "En espera",
+    phase_to_equilibrium: "⏫ Hacia el equilibrio",
+    phase_at_collision: "💥 ¡CHOQUE en el equilibrio!",
+    phase_post_collision: "⏬↗ Después del choque",
+    phase_show_amplitude: "📏 Nueva amplitud A₁",
+    phase_to_detach: "⏫ Hacia el desprendimiento",
+    phase_at_detach: "✂️ ¡Desprendimiento en x=d!",
+    phase_to_meeting: "🎯 Movimiento de proyectiles",
+    phase_meeting_done: "💥 ¡Encuentro!",
+    eqLine: "Equilibrio (x=0)",
+    natLine: "Longitud natural (x=d)",
+    arrowSystem: "Sistema",
+    arrowBall: "Bola",
+    arrowHead: "Cabeza",
+    arrowDisk: "Disco",
+    meetingBanner: "💥 ¡ENCUENTRO!",
+    endExcellent: "🎉 ¡Excelente!",
+    endGood: "👏 ¡Muy bien!",
+    endOk: "💪 ¡Buen intento!",
+    endStudy: "📖 Necesita práctica",
+    endScore: "Puntuación",
+    endAccuracy: "Precisión",
+    q_u0_title: "B1: Velocidad antes del choque",
+    q_u0_q:
+      "El sistema pasa por la <strong>posición de equilibrio</strong> hacia arriba.<br>" +
+      "¿Cuál es la velocidad <code>u₀</code> justo <strong>antes</strong> del choque?",
+    q_u0_hint:
+      "<p><strong>En equilibrio: x = 0</strong></p>" +
+      "<p class='formula'>u₀ = ω · A₀</p>",
+    q_u1_title: "B2a: Velocidad del sistema después",
+    q_u1_q:
+      "Choque <strong>elástico</strong>; la bola estaba en reposo.<br>" +
+      "¿Cuál es <code>u₁'</code> del sistema <strong>después</strong> del choque?<br>" +
+      "<small>(Negativo = hacia abajo)</small>",
+    q_u1_hint:
+      "<p class='formula'>u₁' = [(m₁+m₂) − m₃] / [(m₁+m₂) + m₃] · u₀</p>",
+    q_u3_title: "B2b: Velocidad de la bola después",
+    q_u3_q:
+      "¿Cuál es <code>u₃'</code> de la bola <strong>después</strong> del choque?<br>" +
+      "<small>(Positivo = hacia arriba)</small>",
+    q_u3_hint:
+      "<p class='formula'>u₃' = 2(m₁+m₂) / [(m₁+m₂) + m₃] · u₀</p>",
+    q_a1_title: "C1: Nueva amplitud",
+    q_a1_q:
+      "Tras el choque, el sistema oscila con una nueva amplitud.<br>" +
+      "¿Cuál es la <strong>amplitud A₁</strong>?",
+    q_a1_hint:
+      "<p class='formula'>A₁ = |u₁'| / ω</p>",
+    q_xdet_title: "C2a: Posición de desprendimiento",
+    q_xdet_q:
+      "La cabeza se desprende cuando la normal se hace cero.<br>" +
+      "¿En qué <strong>x</strong> (desde el equilibrio) ocurre el desprendimiento?",
+    q_xdet_hint:
+      "<p class='formula'>x = d</p>",
+    q_vdet_title: "C2b: Velocidad al desprenderse",
+    q_vdet_q:
+      "¿Cuál es la velocidad al desprenderse?<br><small>(en x = d = 0.1 m)</small>",
+    q_vdet_hint:
+      "<p class='formula'>u = ω · √(A₁² − d²)</p>",
+    q_ymeet_title: "D: Altura de encuentro",
+    q_ymeet_q:
+      "Tras el desprendimiento, cabeza y bola son proyectiles.<br>" +
+      "¿A qué <strong>altura y</strong> (desde el equilibrio) se encuentran?",
+    q_ymeet_hint:
+      "<p>Los términos −½gτ² se cancelan al igualar y₂=y₃. Resuelve τ y luego y.</p>",
+  },
+
+  it: {
+    phaseLabel: "FASE",
+    scoreLabel: "PUNTEGGIO",
+    languageLabel: "Lingua",
+    givenData: "Dati del problema",
+    controls: "Controlli",
+    hintTitle: "Suggerimento",
+    slowLine: 'Movimento in <strong style="color: var(--accent-cyan);">RALLENTATORE</strong> (×0.12)',
+    btnContinue: "▶ Continua",
+    btnReset: "↺ Reimposta",
+    inputPh: "Risposta",
+    btnCheck: "✓ Verifica",
+    btnHint: "💡 Voglio un suggerimento",
+    btnReveal: "👁 Mostra la risposta (-10 punti)",
+    btnNext: "▶ Avanti",
+    progress: (i,n)=>`Domanda ${i} di ${n}`,
+    attemptsInfo: (n, hintShown)=>`Tentativi: <strong>${n}</strong> | ${hintShown ? "💡 Suggerimento mostrato" : "Dopo un errore → suggerimento"}`,
+    enterNumber: "Inserisci un numero!",
+    wrong: (a,u)=>`✗ Sbagliato! La tua risposta: ${a} ${u}`,
+    correct: (tol,u)=>`✓ Corretto! (tolleranza ±${tol} ${u})`,
+    hintInfo: "💡 Leggi il suggerimento e riprova!",
+    revealInfo: (v,u)=>`👁 La risposta corretta è: <strong>${v} ${u}</strong><br><small>(-10 punti)</small>`,
+    introTitle: "🎪 Operazione: Lancio del Clown",
+    introSubtitle: "Oscillazione • Urto elastico • Distacco • Moto verticale",
+    introLangTitle: "🌐 Lingua",
+    introLangNote: "(Cambia tutta l’interfaccia.)",
+    introExerciseTitle: "📖 Il problema",
+    introExerciseText:
+      "Due molle verticali sostengono un disco con la testa del clown. " +
+      "Il sistema oscilla e all’equilibrio urta elasticamente una sfera in attesa. " +
+      "Dopo l’urto, la testa si stacca e più tardi incontra la sfera.",
+    introScoringTitle: "🎯 Punteggio",
+    introScoringText:
+      "• <strong style='color: var(--accent-green);'>+20 punti</strong> per ogni risposta corretta<br>" +
+      "• <strong style='color: var(--accent-orange);'>Suggerimento</strong> dopo un errore (senza penalità)<br>" +
+      "• <strong style='color: var(--accent-red);'>-10 punti</strong> se mostri la risposta<br><br>" +
+      "Punteggio massimo: <strong>140 punti</strong> (7 domande)",
+    startGame: "🚀 Inizia!",
+    endResultsTitle: "📊 Risultati",
+    endAnalysisTitle: "📝 Riepilogo di fisica",
+    playAgain: "🔄 Gioca di nuovo",
+    m1: "m₁ (disco)",
+    m2: "m₂ (testa)",
+    m3: "m₃ (sfera)",
+    dLabel: "d (eq→lung. nat.)",
+    a0Label: "A₀ (ampiezza)",
+    omegaG: "ω, g",
+    phase_idle: "In attesa",
+    phase_to_equilibrium: "⏫ Verso equilibrio",
+    phase_at_collision: "💥 URTO all’equilibrio!",
+    phase_post_collision: "⏬↗ Dopo l’urto",
+    phase_show_amplitude: "📏 Nuova ampiezza A₁",
+    phase_to_detach: "⏫ Verso distacco",
+    phase_at_detach: "✂️ Distacco a x=d!",
+    phase_to_meeting: "🎯 Moto di proiettili",
+    phase_meeting_done: "💥 Incontro!",
+    eqLine: "Equilibrio (x=0)",
+    natLine: "Linea lunghezza naturale (x=d)",
+    arrowSystem: "Sistema",
+    arrowBall: "Sfera",
+    arrowHead: "Testa",
+    arrowDisk: "Disco",
+    meetingBanner: "💥 INCONTRO!",
+    endExcellent: "🎉 Eccellente!",
+    endGood: "👏 Molto bene!",
+    endOk: "💪 Buon tentativo!",
+    endStudy: "📖 Serve pratica",
+    endScore: "Punteggio",
+    endAccuracy: "Accuratezza",
+    q_u0_title: "B1: Velocità prima dell’urto",
+    q_u0_q:
+      "Il sistema passa per l’<strong>equilibrio</strong> verso l’alto.<br>" +
+      "Qual è la velocità <code>u₀</code> appena <strong>prima</strong> dell’urto?",
+    q_u0_hint:
+      "<p class='formula'>u₀ = ω · A₀</p>",
+    q_u1_title: "B2a: Velocità del sistema dopo",
+    q_u1_q:
+      "Urto <strong>elastico</strong>, sfera inizialmente ferma.<br>" +
+      "Qual è <code>u₁'</code> del sistema dopo l’urto?<br><small>(Negativo = verso il basso)</small>",
+    q_u1_hint:
+      "<p class='formula'>u₁' = [(m₁+m₂) − m₃] / [(m₁+m₂) + m₃] · u₀</p>",
+    q_u3_title: "B2b: Velocità della sfera dopo",
+    q_u3_q:
+      "Qual è <code>u₃'</code> della sfera dopo l’urto?<br><small>(Positivo = verso l’alto)</small>",
+    q_u3_hint:
+      "<p class='formula'>u₃' = 2(m₁+m₂) / [(m₁+m₂) + m₃] · u₀</p>",
+    q_a1_title: "C1: Nuova ampiezza",
+    q_a1_q: "Qual è l’<strong>ampiezza A₁</strong> dopo l’urto?",
+    q_a1_hint: "<p class='formula'>A₁ = |u₁'| / ω</p>",
+    q_xdet_title: "C2a: Posizione di distacco",
+    q_xdet_q: "A quale <strong>x</strong> (da eq) avviene il distacco?",
+    q_xdet_hint: "<p class='formula'>x = d</p>",
+    q_vdet_title: "C2b: Velocità di distacco",
+    q_vdet_q: "Qual è la velocità al distacco?<br><small>(x = d = 0.1 m)</small>",
+    q_vdet_hint: "<p class='formula'>u = ω · √(A₁² − d²)</p>",
+    q_ymeet_title: "D: Altezza d’incontro",
+    q_ymeet_q: "A quale <strong>altezza y</strong> (da eq) si incontrano?",
+    q_ymeet_hint: "<p>Uguagliando y₂=y₃, i termini −½gτ² si cancellano.</p>",
+  },
+
+  fi: {
+    phaseLabel: "VAIHE",
+    scoreLabel: "PISTEET",
+    languageLabel: "Kieli",
+    givenData: "Tehtävän tiedot",
+    controls: "Ohjaus",
+    hintTitle: "Vihje",
+    slowLine: 'Liike <strong style="color: var(--accent-cyan);">HIDASTUKSELLA</strong> (×0.12)',
+    btnContinue: "▶ Jatka",
+    btnReset: "↺ Nollaa",
+    inputPh: "Vastaus",
+    btnCheck: "✓ Tarkista",
+    btnHint: "💡 Haluan vihjeen",
+    btnReveal: "👁 Näytä vastaus (-10 pistettä)",
+    btnNext: "▶ Seuraava",
+    progress: (i,n)=>`Kysymys ${i} / ${n}`,
+    attemptsInfo: (n, hintShown)=>`Yritykset: <strong>${n}</strong> | ${hintShown ? "💡 Vihje näytetty" : "Virheen jälkeen → vihje"}`,
+    enterNumber: "Syötä numero!",
+    wrong: (a,u)=>`✗ Väärin! Vastauksesi: ${a} ${u}`,
+    correct: (tol,u)=>`✓ Oikein! (toleranssi ±${tol} ${u})`,
+    hintInfo: "💡 Lue vihje ja yritä uudelleen!",
+    revealInfo: (v,u)=>`👁 Oikea vastaus: <strong>${v} ${u}</strong><br><small>(-10 pistettä)</small>`,
+    introTitle: "🎪 Operaatio: Klovni Laukaisu",
+    introSubtitle: "Värähtely • Elastinen törmäys • Irtoaminen • Pystysuora liike",
+    introLangTitle: "🌐 Kieli",
+    introLangNote: "(Vaihtaa koko käyttöliittymän.)",
+    introExerciseTitle: "📖 Tehtävä",
+    introExerciseText:
+      "Kaksi pystysuoraa jousta kannattelee levyä ja klovnin päätä. " +
+      "Järjestelmä värähtelee ja tasapainossa törmää elastisesti paikallaan olevaan palloon. " +
+      "Törmäyksen jälkeen pää irtoaa ja myöhemmin kohtaa pallon.",
+    introScoringTitle: "🎯 Pisteytys",
+    introScoringText:
+      "• <strong style='color: var(--accent-green);'>+20 pistettä</strong> oikeasta vastauksesta<br>" +
+      "• <strong style='color: var(--accent-orange);'>Vihje</strong> virheen jälkeen (ei rangaistusta)<br>" +
+      "• <strong style='color: var(--accent-red);'>-10 pistettä</strong> jos näytät vastauksen<br><br>" +
+      "Maksimi: <strong>140 pistettä</strong> (7 kysymystä)",
+    startGame: "🚀 Aloita!",
+    endResultsTitle: "📊 Tulokset",
+    endAnalysisTitle: "📝 Fysiikan yhteenveto",
+    playAgain: "🔄 Pelaa uudestaan",
+    m1: "m₁ (levy)",
+    m2: "m₂ (pää)",
+    m3: "m₃ (pallo)",
+    dLabel: "d (tasap.→luonn.)",
+    a0Label: "A₀ (amplitudi)",
+    omegaG: "ω, g",
+    phase_idle: "Odotus",
+    phase_to_equilibrium: "⏫ Tasapainoon",
+    phase_at_collision: "💥 TÖRMÄYS tasapainossa!",
+    phase_post_collision: "⏬↗ Törmäyksen jälkeen",
+    phase_show_amplitude: "📏 Uusi amplitudi A₁",
+    phase_to_detach: "⏫ Irtoamiseen",
+    phase_at_detach: "✂️ Irtoaminen x=d!",
+    phase_to_meeting: "🎯 Heittoliike",
+    phase_meeting_done: "💥 Kohtaaminen!",
+    eqLine: "Tasapaino (x=0)",
+    natLine: "Luonnollinen pituus (x=d)",
+    arrowSystem: "Järjestelmä",
+    arrowBall: "Pallo",
+    arrowHead: "Pää",
+    arrowDisk: "Levy",
+    meetingBanner: "💥 KOHTAAMINEN!",
+    endExcellent: "🎉 Erinomaista!",
+    endGood: "👏 Hyvin tehty!",
+    endOk: "💪 Hyvä yritys!",
+    endStudy: "📖 Tarvitsee harjoitusta",
+    endScore: "Pisteet",
+    endAccuracy: "Tarkkuus",
+    q_u0_title: "B1: Nopeus ennen törmäystä",
+    q_u0_q:
+      "Järjestelmä kulkee <strong>tasapainon</strong> kautta ylöspäin.<br>" +
+      "Mikä on nopeus <code>u₀</code> juuri <strong>ennen</strong> törmäystä?",
+    q_u0_hint:
+      "<p class='formula'>u₀ = ω · A₀</p>",
+    q_u1_title: "B2a: Järjestelmän nopeus jälkeen",
+    q_u1_q:
+      "Törmäys on <strong>elastinen</strong>. Pallo oli aluksi levossa.<br>" +
+      "Mikä on <code>u₁'</code> törmäyksen jälkeen?<br><small>(Negatiivinen = alaspäin)</small>",
+    q_u1_hint:
+      "<p class='formula'>u₁' = [(m₁+m₂) − m₃] / [(m₁+m₂) + m₃] · u₀</p>",
+    q_u3_title: "B2b: Pallon nopeus jälkeen",
+    q_u3_q:
+      "Mikä on pallon nopeus <code>u₃'</code> törmäyksen jälkeen?<br><small>(Positiivinen = ylöspäin)</small>",
+    q_u3_hint:
+      "<p class='formula'>u₃' = 2(m₁+m₂) / [(m₁+m₂) + m₃] · u₀</p>",
+    q_a1_title: "C1: Uusi amplitudi",
+    q_a1_q: "Mikä on <strong>amplitudi A₁</strong> törmäyksen jälkeen?",
+    q_a1_hint: "<p class='formula'>A₁ = |u₁'| / ω</p>",
+    q_xdet_title: "C2a: Irtoamiskohta",
+    q_xdet_q: "Missä <strong>x</strong>:ssä irtoaminen tapahtuu?",
+    q_xdet_hint: "<p class='formula'>x = d</p>",
+    q_vdet_title: "C2b: Irtoamisnopeus",
+    q_vdet_q: "Mikä on nopeus irtoamishetkellä?<br><small>(x = d = 0.1 m)</small>",
+    q_vdet_hint: "<p class='formula'>u = ω · √(A₁² − d²)</p>",
+    q_ymeet_title: "D: Kohtaamiskorkeus",
+    q_ymeet_q: "Millä <strong>korkeudella y</strong> ne kohtaavat?",
+    q_ymeet_hint: "<p>Termit −½gτ² kumoutuvat, kun asetat y₂=y₃.</p>",
+  }
+};
+
+let currentLang = "el";
+function T(){ return I18N[currentLang] || I18N.el; }
+function t(key){ const v = T()[key]; return v !== undefined ? v : (I18N.el[key] !== undefined ? I18N.el[key] : key); }
+
+/* =====================================================
+   PHYSICS CONSTANTS (SI units)
+===================================================== */
+const M1 = 0.1, M2 = 0.1, M3 = 0.4;
+const M_SYS = M1 + M2;
+const D = 0.1;
+const G = 10;
+const A0 = 0.5;
+const K_TOTAL = (M_SYS * G) / D;
+const OMEGA = Math.sqrt(K_TOTAL / M_SYS);
+
+// Theoretical values
+const U0 = OMEGA * A0;
+const U1_AFTER = ((M_SYS - M3) / (M_SYS + M3)) * U0;
+const U3_AFTER = (2 * M_SYS / (M_SYS + M3)) * U0;
+const A1 = Math.abs(U1_AFTER) / OMEGA;
+const T_DETACH = (Math.PI + Math.asin(D / A1)) / OMEGA;
+const V_DETACH = OMEGA * Math.sqrt(A1*A1 - D*D);
+
+// Meeting
+const Y_BALL_AT_DETACH = U3_AFTER * T_DETACH - 0.5 * G * T_DETACH * T_DETACH;
+const V_BALL_AT_DETACH = U3_AFTER - G * T_DETACH;
+const TAU_MEET = (Y_BALL_AT_DETACH - D) / (V_DETACH - V_BALL_AT_DETACH);
+const Y_MEET = D + V_DETACH * TAU_MEET - 0.5 * G * TAU_MEET * TAU_MEET;
+
+/* =====================================================
+   GAME STATE
+===================================================== */
+let state = {
+  animState: 'idle',
+  t: 0,
+  x: -A0,
+  v: 0,
+  amplitude: A0,
+
+  ballY: 0,
+  ballV: 0,
+  ballActive: false,
+
+  headY: 0,
+  headV: 0,
+  headDetached: false,
+
+  diskX: 0,
+  diskV: 0,
+
+  currentQuestion: 0,
+  score: 0,
+  attempts: 0,
+  hintShown: false,
+  answerRevealed: false,
+
+  slowMotion: 0.12,
+  running: false
+};
+
+/* =====================================================
+   QUESTIONS (text via I18N)
+===================================================== */
+const QUESTIONS = [
+  {
+    id: 'u0',
+    title: ()=>t('q_u0_title'),
+    question: ()=>t('q_u0_q'),
+    unit: 'm/s',
+    answer: U0,
+    tolerance: 0.15,
+    hint: ()=>t('q_u0_hint'),
+    setupState: () => {
+      state.animState = 'to_equilibrium';
+      state.t = 0;
+      state.x = -A0;
+      state.v = 0;
+      state.ballActive = false;
+      state.headDetached = false;
+    },
+    freezeCondition: () => state.x >= -0.01 && state.v > 0,
+    onFreeze: () => { state.x = 0; state.v = U0; state.animState = 'at_collision'; }
+  },
+  {
+    id: 'u1',
+    title: ()=>t('q_u1_title'),
+    question: ()=>t('q_u1_q'),
+    unit: 'm/s',
+    answer: U1_AFTER,
+    tolerance: 0.15,
+    hint: ()=>t('q_u1_hint'),
+    setupState: () => {
+      state.x = 0;
+      state.v = U1_AFTER;
+      state.ballY = 0;
+      state.ballV = U3_AFTER;
+      state.ballActive = true;
+      state.t = 0;
+      state.animState = 'post_collision';
+    },
+    freezeCondition: () => true,
+    onFreeze: () => {}
+  },
+  {
+    id: 'u3',
+    title: ()=>t('q_u3_title'),
+    question: ()=>t('q_u3_q'),
+    unit: 'm/s',
+    answer: U3_AFTER,
+    tolerance: 0.15,
+    hint: ()=>t('q_u3_hint'),
+    setupState: () => {
+      state.x = 0;
+      state.v = U1_AFTER;
+      state.ballY = 0;
+      state.ballV = U3_AFTER;
+      state.ballActive = true;
+      state.t = 0;
+      state.animState = 'post_collision';
+    },
+    freezeCondition: () => true,
+    onFreeze: () => {}
+  },
+  {
+    id: 'a1',
+    title: ()=>t('q_a1_title'),
+    question: ()=>t('q_a1_q'),
+    unit: 'm',
+    answer: A1,
+    tolerance: 0.02,
+    hint: ()=>t('q_a1_hint'),
+    setupState: () => {
+      state.t = 0;
+      state.amplitude = A1;
+      state.ballActive = true;
+      state.animState = 'post_collision';
+    },
+    freezeCondition: () => state.t > 0.1 && state.x <= -A1 + 0.01,
+    onFreeze: () => { state.x = -A1; state.v = 0; }
+  },
+  {
+    id: 'x_detach',
+    title: ()=>t('q_xdet_title'),
+    question: ()=>t('q_xdet_q'),
+    unit: 'm',
+    answer: D,
+    tolerance: 0.02,
+    hint: ()=>t('q_xdet_hint'),
+    setupState: () => {
+      state.t = 0;
+      state.amplitude = A1;
+      state.x = -A1;
+      state.v = 0;
+      state.ballActive = true;
+      state.headDetached = false;
+      state.animState = 'to_detach';
+    },
+    freezeCondition: () => state.x >= D - 0.008 && state.v > 0,
+    onFreeze: () => { state.x = D; state.v = V_DETACH; state.animState = 'at_detach'; }
+  },
+  {
+    id: 'v_detach',
+    title: ()=>t('q_vdet_title'),
+    question: ()=>t('q_vdet_q'),
+    unit: 'm/s',
+    answer: V_DETACH,
+    tolerance: 0.1,
+    hint: ()=>t('q_vdet_hint'),
+    setupState: () => {
+      state.x = D;
+      state.v = V_DETACH;
+      state.headDetached = false;
+      state.ballActive = true;
+      state.ballY = Y_BALL_AT_DETACH;
+      state.ballV = V_BALL_AT_DETACH;
+      state.animState = 'at_detach';
+      state.t = 0;
+    },
+    freezeCondition: () => true,
+    onFreeze: () => {}
+  },
+  {
+    id: 'y_meet',
+    title: ()=>t('q_ymeet_title'),
+    question: ()=>t('q_ymeet_q'),
+    unit: 'm',
+    answer: Y_MEET,
+    tolerance: 0.05,
+    hint: ()=>t('q_ymeet_hint'),
+    setupState: () => {
+      state.headDetached = true;
+      state.headY = D;
+      state.headV = V_DETACH;
+      state.diskX = D;
+      state.diskV = V_DETACH;
+      state.ballY = Y_BALL_AT_DETACH;
+      state.ballV = V_BALL_AT_DETACH;
+      state.t = 0;
+      state.ballActive = true;
+      state.animState = 'to_meeting';
+    },
+    freezeCondition: () => Math.abs(state.headY - state.ballY) < 0.04,
+    onFreeze: () => { state.headY = Y_MEET; state.ballY = Y_MEET; state.animState = 'meeting_done'; }
+  }
+];
+
+/* =====================================================
+   DOM HELPERS
+===================================================== */
+const $ = (id)=>document.getElementById(id);
+const canvas = $('canvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const PPM = 320;
+const CX = W / 2;
+const FLOOR_Y = H - 50;
+const EQ_Y = FLOOR_Y - 200;
+const NAT_Y = EQ_Y - D * PPM;
+
+function yToPx(y){ return EQ_Y - y * PPM; }
+
+/* =====================================================
+   UI (I18N apply)
+===================================================== */
+function applyI18NStatic(){
+  $('lblPhase').textContent = t('phaseLabel');
+  $('lblScore').textContent = t('scoreLabel');
+  $('lblLanguage').textContent = t('languageLabel');
+  $('lblGivenData').textContent = t('givenData');
+  $('lblControls').textContent = t('controls');
+  $('lblHintTitle').textContent = t('hintTitle');
+
+  $('lblM1').textContent = t('m1');
+  $('lblM2').textContent = t('m2');
+  $('lblM3').textContent = t('m3');
+  $('lblD').textContent = t('dLabel');
+  $('lblA0').textContent = t('a0Label');
+  $('lblOmegaG').textContent = t('omegaG');
+
+  $('btnStart').textContent = t('btnContinue');
+  $('btnReset').textContent = t('btnReset');
+  $('lblSlowLine').innerHTML = t('slowLine');
+
+  $('quizInput').setAttribute('placeholder', t('inputPh'));
+  $('btnCheck').textContent = t('btnCheck');
+  $('btnHint').textContent = t('btnHint');
+  $('btnReveal').textContent = t('btnReveal');
+  $('btnNext').textContent = t('btnNext');
+
+  $('introTitle').textContent = t('introTitle');
+  $('introSubtitle').textContent = t('introSubtitle');
+  $('introLangTitle').textContent = t('introLangTitle');
+  $('introLangNote').textContent = t('introLangNote');
+  $('introExerciseTitle').textContent = t('introExerciseTitle');
+  $('introExerciseText').textContent = "";
+  $('introExerciseText').innerHTML = t('introExerciseText');
+  $('introScoringTitle').textContent = t('introScoringTitle');
+  $('introScoringText').innerHTML = t('introScoringText');
+  $('btnStartGame').textContent = t('startGame');
+
+  $('endResultsTitle').textContent = t('endResultsTitle');
+  $('endAnalysisTitle').textContent = t('endAnalysisTitle');
+  $('btnPlayAgain').textContent = t('playAgain');
+
+  updateProgress(state.currentQuestion);
+  updateAttemptsInfo();
+  updatePhaseDisplay();
+  refreshQuestionText();
+}
+
+function setLanguage(lang){
+  if(!I18N[lang]) lang = "el";
+  currentLang = lang;
+  if($('langSelect') && $('langSelect').value !== lang) $('langSelect').value = lang;
+  if($('langSelectIntro') && $('langSelectIntro').value !== lang) $('langSelectIntro').value = lang;
+  applyI18NStatic();
+}
+
+function refreshQuestionText(){
+  const q = QUESTIONS[state.currentQuestion];
+  if(!q) return;
+  $('quizTitle').textContent = q.title();
+  $('quizQuestion').innerHTML = q.question();
+  $('quizUnit').textContent = q.unit;
+  // update hint content if visible
+  if(!$('hintBox').classList.contains('hidden')){
+    $('hintContent').innerHTML = q.hint();
+    $('lblHintTitle').textContent = t('hintTitle');
+  }
+}
+
+/* =====================================================
+   QUIZ LOGIC
+===================================================== */
+function showQuestion(index) {
+  if (index >= QUESTIONS.length) { endGame(); return; }
+  const q = QUESTIONS[index];
+
+  state.currentQuestion = index;
+  state.attempts = 0;
+  state.hintShown = false;
+  state.answerRevealed = false;
+
+  $('quizTitle').textContent = q.title();
+  $('quizQuestion').innerHTML = q.question();
+  $('quizUnit').textContent = q.unit;
+  $('quizInput').value = '';
+  $('feedback').classList.add('hidden');
+  $('hintBox').classList.add('hidden');
+  $('btnCheck').classList.remove('hidden');
+  $('btnHint').classList.add('hidden');
+  $('btnReveal').classList.add('hidden');
+  $('btnNext').classList.add('hidden');
+
+  q.setupState();
+  state.running = true;
+
+  updateProgress(index);
+  updateAttemptsInfo();
+  updatePhaseDisplay();
+}
+
+function checkAnswer() {
+  const q = QUESTIONS[state.currentQuestion];
+  const raw = $('quizInput').value;
+  const userAnswer = parseFloat(raw);
+
+  if (isNaN(userAnswer)) { showFeedback('wrong', t('enterNumber')); return; }
+
+  state.attempts++;
+  const diff = Math.abs(userAnswer - q.answer);
+  const correct = diff <= q.tolerance;
+
+  if (correct) {
+    if (!state.answerRevealed) {
+      state.score += 20;
+      $('scoreDisplay').textContent = state.score;
+    }
+    showFeedback('correct', t('correct')(q.tolerance.toFixed(2), q.unit));
+
+    const step = $(`step${state.currentQuestion + 1}`);
+    step.classList.remove('active');
+    step.classList.add('done');
+    step.textContent = '✓';
+
+    $('btnCheck').classList.add('hidden');
+    $('btnHint').classList.add('hidden');
+    $('btnReveal').classList.add('hidden');
+    $('btnNext').classList.remove('hidden');
+  } else {
+    showFeedback('wrong', t('wrong')(userAnswer.toFixed(2), q.unit));
+    if (!state.hintShown) $('btnHint').classList.remove('hidden');
+    else if (!state.answerRevealed) $('btnReveal').classList.remove('hidden');
+  }
+
+  updateAttemptsInfo();
+}
+
+function showHint() {
+  const q = QUESTIONS[state.currentQuestion];
+  state.hintShown = true;
+
+  $('hintContent').innerHTML = q.hint();
+  $('hintBox').classList.remove('hidden');
+  $('btnHint').classList.add('hidden');
+  $('btnReveal').classList.remove('hidden');
+
+  showFeedback('info', t('hintInfo'));
+  updateAttemptsInfo();
+}
+
+function revealAnswer() {
+  const q = QUESTIONS[state.currentQuestion];
+  state.answerRevealed = true;
+  state.score = Math.max(0, state.score - 10);
+  $('scoreDisplay').textContent = state.score;
+
+  showFeedback('info', t('revealInfo')(q.answer.toFixed(3), q.unit));
+
+  $('btnCheck').classList.add('hidden');
+  $('btnReveal').classList.add('hidden');
+  $('btnNext').classList.remove('hidden');
+
+  const step = $(`step${state.currentQuestion + 1}`);
+  step.classList.remove('active');
+  step.style.background = 'var(--accent-orange)';
+  step.style.borderColor = 'var(--accent-orange)';
+}
+
+function nextQuestion(){ showQuestion(state.currentQuestion + 1); }
+
+function showFeedback(type, message) {
+  const fb = $('feedback');
+  fb.className = `feedback ${type}`;
+  fb.innerHTML = message;
+  fb.classList.remove('hidden');
+}
+
+function updateAttemptsInfo() {
+  $('attemptsInfo').innerHTML = t('attemptsInfo')(state.attempts, state.hintShown);
+}
+
+function updateProgress(index) {
+  for (let i = 1; i <= 7; i++) {
+    const step = $(`step${i}`);
+    if (!step) continue;
+    if (i < index + 1) { step.classList.add('done'); step.classList.remove('active'); }
+    else if (i === index + 1) { step.classList.add('active'); step.classList.remove('done'); }
+    else { step.classList.remove('active', 'done'); }
+  }
+  $('progressFill').style.width = `${(index / 7) * 100}%`;
+  $('progressText').textContent = t('progress')(index + 1, 7);
+}
+
+function updatePhaseDisplay() {
+  const map = {
+    'idle': t('phase_idle'),
+    'to_equilibrium': t('phase_to_equilibrium'),
+    'at_collision': t('phase_at_collision'),
+    'post_collision': t('phase_post_collision'),
+    'show_amplitude': t('phase_show_amplitude'),
+    'to_detach': t('phase_to_detach'),
+    'at_detach': t('phase_at_detach'),
+    'to_meeting': t('phase_to_meeting'),
+    'meeting_done': t('phase_meeting_done')
+  };
+  $('phaseDisplay').textContent = map[state.animState] || state.animState;
+}
+
+/* =====================================================
+   PHYSICS UPDATE
+===================================================== */
+function update(dt) {
+  dt *= state.slowMotion;
+  if (!state.running) return;
+
+  const q = QUESTIONS[state.currentQuestion];
+  if (!q) return;
+
+  state.t += dt;
+
+  switch (state.animState) {
+    case 'to_equilibrium':
+      state.x = -A0 * Math.cos(OMEGA * state.t);
+      state.v = A0 * OMEGA * Math.sin(OMEGA * state.t);
+      if (q.freezeCondition()) { q.onFreeze(); state.running = false; updatePhaseDisplay(); }
+      break;
+
+    case 'post_collision':
+    case 'show_amplitude':
+      state.x = -A1 * Math.sin(OMEGA * state.t);
+      state.v = -A1 * OMEGA * Math.cos(OMEGA * state.t);
+      state.ballY = U3_AFTER * state.t - 0.5 * G * state.t * state.t;
+      state.ballV = U3_AFTER - G * state.t;
+      if (q.freezeCondition()) { q.onFreeze(); state.running = false; updatePhaseDisplay(); }
+      break;
+
+    case 'to_detach':
+      state.x = -A1 * Math.cos(OMEGA * state.t);
+      state.v = A1 * OMEGA * Math.sin(OMEGA * state.t);
+
+      // ball after collision, time shifted so that when x reaches 0 first time, t≈π/2ω
+      const tFromCollision = Math.PI / (2 * OMEGA) + state.t;
+      state.ballY = U3_AFTER * tFromCollision - 0.5 * G * tFromCollision * tFromCollision;
+      state.ballV = U3_AFTER - G * tFromCollision;
+
+      if (q.freezeCondition()) { q.onFreeze(); state.running = false; updatePhaseDisplay(); }
+      break;
+
+    case 'to_meeting':
+      const tDet = state.t;
+      state.headY = D + V_DETACH * tDet - 0.5 * G * tDet * tDet;
+      state.headV = V_DETACH - G * tDet;
+
+      state.ballY = Y_BALL_AT_DETACH + V_BALL_AT_DETACH * tDet - 0.5 * G * tDet * tDet;
+      state.ballV = V_BALL_AT_DETACH - G * tDet;
+
+      // Visual-only: disk continues a small oscillation (not assessed by quiz)
+      state.diskX = D * Math.cos(OMEGA * tDet);
+      state.diskV = -D * OMEGA * Math.sin(OMEGA * tDet);
+
+      if (q.freezeCondition()) { q.onFreeze(); state.running = false; updatePhaseDisplay(); }
+      break;
+  }
+}
+
+/* =====================================================
+   DRAWING (keeps previous visual fixes)
+===================================================== */
+function drawLine(y, color, label) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 5]);
+  ctx.beginPath();
+  ctx.moveTo(40, y);
+  ctx.lineTo(W - 40, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = color;
+  ctx.font = '12px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText(label, 50, y - 8);
+}
+
+function drawSpring(x1, y1, x2, y2) {
+  const coils = 14, amp = 12;
+  const len = Math.abs(y2 - y1);
+  const nat = 150;
+
+  ctx.strokeStyle = len < nat * 0.85 ? '#FF6B6B' : len > nat * 1.15 ? '#4ECDC4' : 'rgba(255,255,255,0.6)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+
+  const dy = (y2 - y1) / coils;
+  for (let i = 1; i < coils; i++) ctx.lineTo(x1 + (i % 2 === 0 ? -amp : amp), y1 + dy * i);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+
+  ctx.fillStyle = '#666';
+  ctx.beginPath();
+  ctx.arc(x1, y1, 6, 0, Math.PI * 2);
+  ctx.arc(x2, y2, 6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawClownHead(cx, cy) {
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  const grad = ctx.createRadialGradient(0, -5, 5, 0, 0, 28);
+  grad.addColorStop(0, '#FFE4C4');
+  grad.addColorStop(1, '#FFD2A8');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 0, 28, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ff2d2d';
+  ctx.beginPath();
+  ctx.arc(0, 6, 9, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#121212';
+  ctx.beginPath();
+  ctx.arc(-11, -6, 4, 0, Math.PI * 2);
+  ctx.arc(11, -6, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#ff4a7a';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(0, 6, 15, 0.2, Math.PI - 0.2);
+  ctx.stroke();
+
+  ctx.fillStyle = '#ff7a00';
+  ctx.beginPath();
+  ctx.arc(-22, -18, 11, 0, Math.PI * 2);
+  ctx.arc(22, -18, 11, 0, Math.PI * 2);
+  ctx.arc(0, -28, 11, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = 'bold 11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('m₂', 0, 3);
+
+  ctx.restore();
+}
+
+function drawBall(cx, cy) {
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(3, 5, 18, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const grad = ctx.createRadialGradient(-5, -5, 2, 0, 0, 20);
+  grad.addColorStop(0, '#bbb');
+  grad.addColorStop(0.5, '#888');
+  grad.addColorStop(1, '#444');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 0, 20, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.beginPath();
+  ctx.arc(-7, -7, 6, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 12px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('m₃', 0, 5);
+
+  ctx.restore();
+}
+
+function drawArrow(x, y, v, color, label) {
+  const scale = 12;
+  const len = Math.min(Math.abs(v) * scale, 55);
+  const dir = v > 0 ? -1 : 1;
+
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 3;
+
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x, y + dir * len);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x, y + dir * (len + 8));
+  ctx.lineTo(x - 6, y + dir * len);
+  ctx.lineTo(x + 6, y + dir * len);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${Math.abs(v).toFixed(1)} m/s`, x, y + dir * len + dir * 20);
+  ctx.fillText(label, x, y + dir * len + dir * 35);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // stars
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  for (let i = 0; i < 40; i++) ctx.fillRect((i * 137) % W, (i * 89) % H, 2, 2);
+
+  // reference lines
+  drawLine(EQ_Y, '#4ECDC4', t('eqLine'));
+  drawLine(NAT_Y, '#FFD700', t('natLine'));
+
+  // ground
+  ctx.fillStyle = '#2a2a4a';
+  ctx.fillRect(0, FLOOR_Y, W, H - FLOOR_Y);
+
+  // disk position
+  let diskY;
+  if (state.headDetached) diskY = yToPx(state.diskX);
+  else diskY = yToPx(state.x);
+
+  // springs
+  const spc = 55;
+  drawSpring(CX - spc, FLOOR_Y, CX - spc, diskY + 15);
+  drawSpring(CX + spc, FLOOR_Y, CX + spc, diskY + 15);
+
+  // disk
+  const barW = 160, barH = 30;
+  ctx.fillStyle = 'rgba(100, 100, 150, 0.9)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(CX - barW/2, diskY - barH/2, barW, barH, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.font = '13px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('m₁+m₂', CX, diskY + 5);
+
+  // head
+  let headPxY;
+  if (state.headDetached) headPxY = yToPx(state.headY);
+  else headPxY = diskY - barH/2 - 32;
+  drawClownHead(CX, headPxY);
+
+  // ball (visual fix: never under head just after collision)
+  let ballPxY;
+  const HEAD_R = 28, BALL_R = 20;
+  if (!state.ballActive) {
+    ballPxY = yToPx(0) - 90;
+  } else {
+    const justAfterCollision = (state.animState === 'post_collision' && state.t < 0.04 && state.ballY <= 0.06);
+    const atCollisionFrame = (state.animState === 'at_collision');
+    if (atCollisionFrame || justAfterCollision) ballPxY = headPxY - HEAD_R - BALL_R - 2;
+    else ballPxY = yToPx(state.ballY);
+  }
+  drawBall(CX, ballPxY);
+
+  // arrows
+  if (state.v !== 0 && !state.headDetached) drawArrow(CX - 120, diskY, state.v, '#4ECDC4', t('arrowSystem'));
+  if (state.ballActive && state.ballV !== 0) drawArrow(CX + 110, ballPxY, state.ballV, '#FF6B6B', t('arrowBall'));
+  if (state.headDetached && state.headV !== 0) drawArrow(CX - 110, headPxY, state.headV, '#7ED321', t('arrowHead'));
+  if (state.headDetached) drawArrow(CX - 150, diskY, state.diskV, '#4ECDC4', t('arrowDisk'));
+
+  // meeting snapshot: no spoiler y on canvas
+  if (state.animState === 'meeting_done') {
+    ctx.fillStyle = 'rgba(255, 215, 0, 0.25)';
+    ctx.beginPath();
+    ctx.arc(CX, yToPx(Y_MEET), 55, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#FFD700';
+    ctx.font = 'bold 18px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(t('meetingBanner'), CX, yToPx(Y_MEET) - 60);
+  }
+}
+
+/* =====================================================
+   GAME LOOP
+===================================================== */
+let lastTime = 0;
+function gameLoop(ts){
+  const dt = Math.min((ts - lastTime) / 1000, 0.05);
+  lastTime = ts;
+  update(dt);
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+/* =====================================================
+   EVENTS
+===================================================== */
+$('btnStartGame').addEventListener('click', () => {
+  $('introModal').classList.add('hidden');
+  showQuestion(0);
+});
+$('btnCheck').addEventListener('click', checkAnswer);
+$('btnHint').addEventListener('click', showHint);
+$('btnReveal').addEventListener('click', revealAnswer);
+$('btnNext').addEventListener('click', nextQuestion);
+$('btnStart').addEventListener('click', () => { if (!state.running) state.running = true; });
+$('btnReset').addEventListener('click', () => location.reload());
+$('btnPlayAgain').addEventListener('click', () => location.reload());
+
+$('quizInput').addEventListener('keypress', (e)=>{
+  if(e.key === 'Enter'){
+    if(!$('btnCheck').classList.contains('hidden')) checkAnswer();
+    else if(!$('btnNext').classList.contains('hidden')) nextQuestion();
+  }
+});
+
+// language selectors
+if($('langSelect')) $('langSelect').addEventListener('change', e=>setLanguage(e.target.value));
+if($('langSelectIntro')) $('langSelectIntro').addEventListener('change', e=>setLanguage(e.target.value));
+
+/* =====================================================
+   END GAME
+===================================================== */
+function endGame() {
+  state.animState = 'meeting_done';
+  state.running = false;
+
+  const maxScore = 140;
+  const pct = Math.round((state.score / maxScore) * 100);
+
+  let medal, title;
+  if (pct >= 85) { medal = '🥇'; title = t('endExcellent'); }
+  else if (pct >= 70) { medal = '🥈'; title = t('endGood'); }
+  else if (pct >= 50) { medal = '🥉'; title = t('endOk'); }
+  else { medal = '📚'; title = t('endStudy'); }
+
+  $('endTitle').textContent = title;
+  $('endMedal').textContent = medal;
+
+  $('endResults').innerHTML = `
+    <p style="font-size:14px;">${t('endScore')}: <strong style="color:var(--accent-gold);font-size:18px;">${state.score}/${maxScore}</strong></p>
+    <p>${t('endAccuracy')}: <strong>${pct}%</strong></p>
+  `;
+
+  // Teacher-facing numbers (still fine)
+  $('endAnalysis').innerHTML = `
+    <p style="font-size:12px;line-height:1.8;color:var(--muted);">
+      • u₀ = ωA₀ = <strong>${U0.toFixed(1)} m/s</strong><br>
+      • u₁' = <strong>${U1_AFTER.toFixed(2)} m/s</strong>, u₃' = <strong>${U3_AFTER.toFixed(2)} m/s</strong><br>
+      • A₁ = <strong>${(A1*100).toFixed(1)} cm</strong><br>
+      • x<sub>det</sub> = d = <strong>0.1 m</strong><br>
+      • u<sub>det</sub> = <strong>${V_DETACH.toFixed(2)} m/s</strong><br>
+      • t<sub>det</sub> ≈ <strong>0.38 s</strong><br>
+      • y<sub>meet</sub> ≈ <strong>${Y_MEET.toFixed(2)} m</strong><br>
+    </p>
+  `;
+
+  $('endModal').classList.remove('hidden');
+}
+
+/* =====================================================
+   INIT
+===================================================== */
+$('scoreDisplay').textContent = state.score;
+setLanguage('el'); // Greek default, English 2nd in dropdown
+requestAnimationFrame(gameLoop);
+</script>
+</body>
+</html>
