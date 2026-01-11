@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PhysicsPlay — Exercises</title>
+  <style>
+    :root{
+      --bg-dark:#0f0f1e;
+      --panel: rgba(30,30,30,.78);
+      --text: rgba(240,246,252,.92);
+      --muted: rgba(240,246,252,.70);
+      --border: rgba(255,255,255,.12);
+      --accent: #4ECDC4;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(102,126,234,.35), transparent 60%),
+                  radial-gradient(900px 500px at 80% 80%, rgba(118,75,162,.35), transparent 60%),
+                  var(--bg-dark);
+      min-height:100vh;
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:28px 16px 40px}
+    header{
+      display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    h1{margin:0;font-size:28px;letter-spacing:.2px}
+    p{margin:6px 0 0;color:var(--muted);line-height:1.45}
+    .note{
+      margin-top:10px;
+      padding:10px 12px;
+      background: rgba(0,0,0,.25);
+      border:1px solid var(--border);
+      border-radius:14px;
+      color: var(--muted);
+      font-size:14px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+    .card{
+      position:relative;
+      background: var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      transition: transform .18s ease, border-color .18s ease;
+      overflow:hidden;
+    }
+    .card:hover{transform: translateY(-2px); border-color: rgba(78,205,196,.35)}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      background: rgba(78,205,196,.12);
+      border:1px solid rgba(78,205,196,.25);
+      color: var(--text);
+      font-size:13px;
+    }
+    .icon{
+      width:44px;height:44px;border-radius:14px;
+      display:grid;place-items:center;
+      background: rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      font-size:22px;
+      margin:12px 0 10px;
+    }
+    .title{margin:0;font-size:18px}
+    .desc{margin:6px 0 0;color:var(--muted);font-size:14px}
+    a.cardLink{
+      position:absolute; inset:0;
+      text-decoration:none; color:inherit;
+    }
+    footer{margin-top:22px;color:var(--muted);font-size:13px}
+    .lang{opacity:.9}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🧪 PhysicsPlay — Exercises</h1>
+        <p>Mini-games based on specific high-school Physics exercises (Λύκειο).</p>
+        <div class="note">
+          If you ever see a blank page here, open DevTools → Console. 99% it’s a broken path (starts with “/”) or a JS error.
+          <span class="lang"> (Αν δεις “μαύρη” σελίδα: έλεγξε Console για errors / 404.)</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <a class="cardLink" href="./Jack-in-the-box.html" aria-label="Open Jack-in-the-box game"></a>
+        <span class="badge">🎮 1 game available</span>
+        <div class="icon">📦</div>
+        <h2 class="title">Jack-in-the-box</h2>
+        <p class="desc">Click to play the first exercise-based game.</p>
+      </div>
+    </section>
+
+    <footer>
+      © PhysicsPlay • Hosted on GitHub Pages
+    </footer>
+  </div>
+</body>
+</html>
