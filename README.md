@@ -1,6 +1,49 @@
 # exercises
 Games based on specific exercises in Physics
 
+# 🎮 Physics Games — based on specific High School exercises  
+# 🎮 Παιχνίδια Φυσικής — βασισμένα σε συγκεκριμένες ασκήσεις Λυκείου
+
+> **EN:** A collection of small, playable physics games. Each game is tied to a *specific exercise* (or exercise type) from high school Physics, so students practice the exact concepts they need — through gameplay.  
+> **EL:** Μια συλλογή από μικρά, παικτικά παιχνίδια Φυσικής. Κάθε παιχνίδι αντιστοιχεί σε *συγκεκριμένη άσκηση* (ή τύπο άσκησης) Φυσικής Λυκείου, ώστε οι μαθητές να εξασκούνται στα σωστά ζητούμενα — μέσα από gameplay.
+
+---
+
+## 📌 Table of Contents / Περιεχόμενα
+- [EN — Overview](#en--overview)
+- [EN — Repository structure](#en--repository-structure)
+- [EN — Play online (GitHub Pages)](#en--play-online-github-pages)
+- [EN — Run locally](#en--run-locally)
+- [EN — Add a new game](#en--add-a-new-game)
+- [EN — Design principles](#en--design-principles)
+- [EL — Περιγραφή](#el--περιγραφή)
+- [EL — Δομή αποθετηρίου](#el--δομή-αποθετηρίου)
+- [EL — Παίξε online (GitHub Pages)](#el--παίξε-online-github-pages)
+- [EL — Εκτέλεση τοπικά](#el--εκτέλεση-τοπικά)
+- [EL — Πρόσθεσε νέο παιχνίδι](#el--πρόσθεσε-νέο-παιχνίδι)
+- [EL — Αρχές σχεδίασης](#el--αρχές-σχεδίασης)
+- [License](#license)
+- [Credits](#credits)
+
+---
+
+# EN — Overview
+
+This repository hosts **online physics games** (pure HTML/CSS/JS) designed for **high school (Lyceum)**.  
+Each game maps to a **specific exercise**: you get the same givens, the same target quantity, and the same physics laws — but in an interactive, score-based mission.
+
+✅ Goals:
+- Make students *calculate*, not guess  
+- Visualize the physics (motion, energy, forces, circuits, etc.)  
+- Provide feedback: theory vs experiment, error %, attempts, hints
+
+---
+
+## EN — Repository structure
+
+Suggested structure (feel free to adapt):
+
+
 ---
 
 ## EN — Play online (GitHub Pages)
