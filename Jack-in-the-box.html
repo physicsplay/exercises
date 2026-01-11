@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhysicsPlay — Exercises</title>
+  <meta name="description" content="Interactive physics games based on specific high school exercises." />
+  <style>
+    :root{
+      --bg-dark:#0f0f1e;
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --accent-gold:#FFD700;
+      --accent-cyan:#4ECDC4;
+      --accent-red:#FF6B6B;
+      --text-light: rgba(240, 246, 252, 0.92);
+      --muted: rgba(240, 246, 252, 0.68);
+      --panel-bg: rgba(20, 20, 35, 0.62);
+      --panel-border: rgba(255,255,255,0.14);
+      --shadow: 0 18px 60px rgba(0,0,0,0.45);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text-light);
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(78,205,196,0.20), transparent 60%),
+                  radial-gradient(900px 500px at 90% 20%, rgba(255,107,107,0.18), transparent 55%),
+                  radial-gradient(1100px 700px at 60% 90%, rgba(255,215,0,0.10), transparent 60%),
+                  var(--bg-dark);
+      overflow-x: hidden;
+    }
+
+    .bgGlow{
+      position: fixed;
+      inset: -40vh -40vw;
+      background: var(--bg-gradient);
+      filter: blur(120px);
+      opacity: 0.18;
+      z-index: -1;
+      transform: translateZ(0);
+    }
+
+    header{
+      padding: 28px 18px 10px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .topRow{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 240px;
+    }
+
+    .logo{
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(78,205,196,0.95), rgba(102,126,234,0.95));
+      box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+      display:grid;
+      place-items:center;
+      font-size: 22px;
+      user-select:none;
+    }
+
+    h1{
+      margin:0;
+      font-size: clamp(18px, 3vw, 26px);
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle{
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .controls{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex: 1;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    }
+
+    .langBtn{
+      border: 0;
+      background: transparent;
+      color: var(--text-light);
+      cursor:pointer;
+      font-size: 18px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+      opacity: 0.75;
+    }
+    .langBtn[aria-pressed="true"]{
+      opacity: 1;
+      background: rgba(255,255,255,0.10);
+    }
+    .langBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.10); opacity: 1; }
+    .langBtn:focus-visible{ outline: 2px solid rgba(78,205,196,0.75); outline-offset: 2px; }
+
+    .searchWrap{
+      position: relative;
+      min-width: min(520px, 92vw);
+      flex: 1;
+    }
+
+    .search{
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.07);
+      color: var(--text-light);
+      padding: 12px 40px 12px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      font-size: 14px;
+      outline: none;
+    }
+    .search::placeholder{ color: rgba(240,246,252,0.55); }
+    .search:focus{
+      border-color: rgba(78,205,196,0.55);
+      box-shadow: 0 0 0 4px rgba(78,205,196,0.14), 0 12px 30px rgba(0,0,0,0.25);
+    }
+    .searchIcon{
+      position:absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.75;
+      user-select:none;
+      pointer-events: none;
+      font-size: 16px;
+    }
+
+    main{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 12px 18px 38px;
+    }
+
+    .panel{
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 16px;
+    }
+
+    .metaRow{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .hintText{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      color: rgba(240,246,252,0.85);
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 2px 6px;
+      border-radius: 8px;
+      margin: 0 4px;
+      white-space: nowrap;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .searchWrap{ min-width: min(540px, 92vw); }
+    }
+    @media (max-width: 560px){
+      .grid{ grid-template-columns: 1fr; }
+      .pill{ width: 100%; justify-content: space-between; }
+      .controls{ width: 100%; justify-content: stretch; }
+      .searchWrap{ min-width: 100%; }
+    }
+
+    .card{
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      overflow:hidden;
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      min-height: 138px;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(78,205,196,0.35);
+      background: rgba(255,255,255,0.075);
+    }
+
+    .cardLink{
+      display:flex;
+      gap: 14px;
+      padding: 14px;
+      text-decoration:none;
+      color: inherit;
+      height: 100%;
+    }
+    .cardLink:focus-visible{
+      outline: 2px solid rgba(78,205,196,0.75);
+      outline-offset: 3px;
+      border-radius: 18px;
+    }
+
+    .badge{
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      display:grid;
+      place-items:center;
+      font-size: 26px;
+      flex: 0 0 auto;
+      background: linear-gradient(135deg, rgba(255,215,0,0.22), rgba(78,205,196,0.18));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      user-select:none;
+    }
+
+    .cardBody{
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .cardTitle{
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+      letter-spacing: 0.2px;
+    }
+
+    .cardDesc{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .chips{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .chip{
+      font-size: 12px;
+      color: rgba(240,246,252,0.86);
+      background: rgba(0,0,0,0.26);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 4px 8px;
+      border-radius: 999px;
+      user-select:none;
+    }
+
+    .emptyState{
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.18);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    footer{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 18px 28px;
+      color: rgba(240,246,252,0.55);
+      font-size: 12px;
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 35, 0.85);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: rgba(240,246,252,0.92);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .toast.show{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bgGlow" aria-hidden="true"></div>
+
+  <header>
+    <div class="topRow">
+      <div class="brand" aria-label="PhysicsPlay">
+        <div class="logo" aria-hidden="true">⚛️</div>
+        <div>
+          <h1 id="tTitle">PhysicsPlay — Exercises</h1>
+          <p class="subtitle" id="tSubtitle">Pick a game icon to practice a specific Physics exercise.</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="pill" role="group" aria-label="Language">
+          <span style="font-size:12px; color: rgba(240,246,252,0.7);" id="tLang">Language</span>
+          <button class="langBtn" id="btnEL" aria-pressed="true" title="Ελληνικά">🇬🇷</button>
+          <button class="langBtn" id="btnEN" aria-pressed="false" title="English">🇬🇧</button>
+        </div>
+
+        <div class="searchWrap" aria-label="Search games">
+          <input id="search" class="search" type="search" autocomplete="off" placeholder="Search by title or topic…" />
+          <div class="searchIcon" aria-hidden="true">🔎</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" aria-label="Games">
+      <div class="metaRow">
+        <div class="hintText" id="tHint">
+          Tips: <span class="kbd">Tab</span> focus • <span class="kbd">Enter</span> open • <span class="kbd">/</span> search • <span class="kbd">L</span> language
+        </div>
+        <div class="hintText" id="tCount"></div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+      <div id="empty" class="emptyState" style="display:none;"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="tFooter">Made for high school Physics practice — calculations encouraged, guessing discouraged 🙂</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ========= I18N ========= */
+    const I18N = {
+      el: {
+        title: "PhysicsPlay — Ασκήσεις",
+        subtitle: "Διάλεξε εικονίδιο παιχνιδιού για να εξασκηθείς σε μια συγκεκριμένη άσκηση Φυσικής.",
+        language: "Γλώσσα",
+        searchPH: "Αναζήτηση με τίτλο ή ενότητα…",
+        tips: 'Tips: <span class="kbd">Tab</span> εστίαση • <span class="kbd">Enter</span> άνοιγμα • <span class="kbd">/</span> αναζήτηση • <span class="kbd">L</span> γλώσσα',
+        count: (n) => `Παιχνίδια: ${n}`,
+        empty: "Δεν βρέθηκε παιχνίδι με αυτά τα κριτήρια. Δοκίμασε άλλο keyword (ή πάτησε Esc για καθάρισμα).",
+        footer: "Φτιαγμένο για εξάσκηση στη Φυσική Λυκείου — οι υπολογισμοί κερδίζουν, το μάντεμα όχι 🙂",
+        play: "ΠΑΙΞΕ",
+        open: "Άνοιγμα παιχνιδιού"
+      },
+      en: {
+        title: "PhysicsPlay — Exercises",
+        subtitle: "Pick a game icon to practice a specific Physics exercise.",
+        language: "Language",
+        searchPH: "Search by title or topic…",
+        tips: 'Tips: <span class="kbd">Tab</span> focus • <span class="kbd">Enter</span> open • <span class="kbd">/</span> search • <span class="kbd">L</span> language',
+        count: (n) => `Games: ${n}`,
+        empty: "No games match your search. Try a different keyword (or press Esc to clear).",
+        footer: "Made for high school Physics practice — calculations encouraged, guessing discouraged 🙂",
+        play: "PLAY",
+        open: "Open game"
+      }
+    };
+
+    let currentLang = "el";
+
+    /* ========= GAMES LIST =========
+       Add new games here later.
+       Keep file paths relative to this index.html.
+    */
+    const GAMES = [
+      {
+        id: "jack",
+        emoji: "🎁",
+        file: "Jack-in-the-box.html",
+        title: { el: "Jack-in-the-box", en: "Jack-in-the-box" },
+        desc: {
+          el: "Άσκηση-παιχνίδι: στόχευσε σωστά υπολογίζοντας (όχι μαντεύοντας).",
+          en: "Exercise-based game: aim correctly by calculating (not guessing)."
+        },
+        topics: { el: ["Φυσική", "Άσκηση"], en: ["Physics", "Exercise"] }
+      }
+    ];
+
+    /* ========= DOM ========= */
+    const elTitle = document.getElementById("tTitle");
+    const elSubtitle = document.getElementById("tSubtitle");
+    const elLang = document.getElementById("tLang");
+    const elHint = document.getElementById("tHint");
+    const elCount = document.getElementById("tCount");
+    const elFooter = document.getElementById("tFooter");
+    const elSearch = document.getElementById("search");
+    const elGrid = document.getElementById("grid");
+    const elEmpty = document.getElementById("empty");
+    const btnEL = document.getElementById("btnEL");
+    const btnEN = document.getElementById("btnEN");
+    const toast = document.getElementById("toast");
+
+    function setLanguage(lang){
+      currentLang = lang;
+      btnEL.setAttribute("aria-pressed", lang === "el");
+      btnEN.setAttribute("aria-pressed", lang === "en");
+
+      const t = I18N[currentLang];
+      document.documentElement.lang = currentLang;
+
+      elTitle.textContent = t.title;
+      elSubtitle.textContent = t.subtitle;
+      elLang.textContent = t.language;
+      elSearch.placeholder = t.searchPH;
+      elHint.innerHTML = t.tips;
+      elFooter.textContent = t.footer;
+
+      render();
+      showToast(lang === "el" ? "Γλώσσα: Ελληνικά" : "Language: English");
+    }
+
+    function normalize(s){
+      return (s || "")
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function filteredGames(){
+      const q = normalize(elSearch.value);
+      if(!q) return GAMES.slice();
+
+      return GAMES.filter(g=>{
+        const title = normalize(g.title[currentLang] || g.title.en);
+        const desc  = normalize(g.desc[currentLang] || g.desc.en);
+        const topics = (g.topics[currentLang] || g.topics.en || []).map(normalize).join(" ");
+        const file = normalize(g.file);
+        return (title + " " + desc + " " + topics + " " + file).includes(q);
+      });
+    }
+
+    function render(){
+      const list = filteredGames();
+      elGrid.innerHTML = "";
+
+      const t = I18N[currentLang];
+      elCount.textContent = t.count(list.length);
+
+      if(list.length === 0){
+        elEmpty.style.display = "block";
+        elEmpty.textContent = t.empty;
+        return;
+      }
+      elEmpty.style.display = "none";
+
+      list.forEach((g, idx)=>{
+        const a = document.createElement("a");
+        a.className = "cardLink";
+        a.href = g.file;
+        a.setAttribute("aria-label", `${t.open}: ${g.title[currentLang] || g.title.en}`);
+        a.dataset.index = String(idx);
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.appendChild(a);
+
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.textContent = g.emoji || "🎮";
+
+        const body = document.createElement("div");
+        body.className = "cardBody";
+
+        const h = document.createElement("h3");
+        h.className = "cardTitle";
+        h.textContent = g.title[currentLang] || g.title.en;
+
+        const p = document.createElement("p");
+        p.className = "cardDesc";
+        p.textContent = g.desc[currentLang] || g.desc.en;
+
+        const chips = document.createElement("div");
+        chips.className = "chips";
+        const topics = (g.topics[currentLang] || g.topics.en || []);
+        topics.forEach(tp=>{
+          const c = document.createElement("span");
+          c.className = "chip";
+          c.textContent = tp;
+          chips.appendChild(c);
+        });
+
+        body.appendChild(h);
+        body.appendChild(p);
+        body.appendChild(chips);
+
+        a.appendChild(badge);
+        a.appendChild(body);
+
+        elGrid.appendChild(card);
+      });
+    }
+
+    function showToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=> toast.classList.remove("show"), 1400);
+    }
+
+    /* ========= EVENTS ========= */
+    btnEL.addEventListener("click", ()=> setLanguage("el"));
+    btnEN.addEventListener("click", ()=> setLanguage("en"));
+
+    elSearch.addEventListener("input", render);
+
+    // Keyboard shortcuts: "/" focuses search, "L" toggles language, "Esc" clears search
+    window.addEventListener("keydown", (e)=>{
+      if(e.key === "/" && document.activeElement !== elSearch){
+        e.preventDefault();
+        elSearch.focus();
+        elSearch.select();
+        return;
+      }
+      if((e.key === "l" || e.key === "L") && !e.ctrlKey && !e.metaKey && !e.altKey){
+        e.preventDefault();
+        setLanguage(currentLang === "el" ? "en" : "el");
+        return;
+      }
+      if(e.key === "Escape"){
+        if(elSearch.value){
+          elSearch.value = "";
+          render();
+          showToast(currentLang === "el" ? "Καθαρίστηκε η αναζήτηση" : "Search cleared");
+        }
+      }
+    });
+
+    // Tiny easter egg: type "newton" in search
+    elSearch.addEventListener("input", ()=>{
+      const q = normalize(elSearch.value);
+      if(q === "newton"){
+        showToast(currentLang === "el" ? "🍎 Ένα μήλο εγκρίνει τους υπολογισμούς σου." : "🍎 An apple approves your calculations.");
+      }
+    });
+
+    /* ========= INIT ========= */
+    setLanguage("el");
+  </script>
+</body>
+</html>
